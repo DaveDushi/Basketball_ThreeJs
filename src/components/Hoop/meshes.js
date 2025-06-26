@@ -1,4 +1,4 @@
-import { Mesh } from 'three';
+import { Mesh, Line, Group } from 'three';
 
 import { createGeometries } from './geometries';
 import { createMaterials } from './materials';
@@ -6,39 +6,43 @@ import { createMaterials } from './materials';
 function createMeshes() {
     const geometries = createGeometries();
     const materials = createMaterials();
+    
+    const pole = new Mesh(geometries.pole, materials.base)
 
-    const cabin = new Mesh(geometries.cabin, materials.body);
-    cabin.position.set(1.5, 1.4, 0);
+    const uprightPole = pole.clone()
+    uprightPole.scale.y = 3.68
+    uprightPole.position.y = 1.84
 
-    const chimney = new Mesh(geometries.chimney, materials.detail);
-    chimney.position.set(-2, 1.9, 0)
+    const hoop = new Group()
 
-    const nose = new Mesh(geometries.nose, materials.body);
-    nose.position.set(-1, 1, 0);
-    nose.rotation.z = Math.PI / 2;
+    const backboard = new Mesh(geometries.backboard, materials.glass)
 
-    const smallWheelRear = new Mesh(geometries.wheel, materials.detail);
-    smallWheelRear.position.y = 0.5;
-    smallWheelRear.rotation.x = Math.PI / 2
+    const rim = new Group()
+    const rimConnector = new Mesh(geometries.connector, materials.orangeMetal)
+    rimConnector.position.z = .05;
 
-    const smallWheelCenter = smallWheelRear.clone();
-    smallWheelCenter.position.x = -1;
+    const rimCircle = new Mesh(geometries.rim, materials.orangeMetal);
+    rimCircle.rotation.x = Math.PI / 2
+    rimCircle.position.z = 0.3
 
-    const smallWheelFront = smallWheelRear.clone();
-    smallWheelFront.position.x = -2;
+    const net = new Mesh(geometries.net, materials.net)
+    net.position.z = 0.3;
+    net.position.y = -.2;
 
-    const bigWheel = smallWheelRear.clone();
-    bigWheel.position.set(1.5, 0.9, 0);
-    bigWheel.scale.set(2, 1.25, 2);
+    rim.add(rimCircle, rimConnector, net)
+
+    rim.position.y = -0.305;
+
+    hoop.add(backboard, rim)
+
+    hoop.position.y = 3.07
+
+
+    
 
     return {
-        cabin,
-        chimney,
-        nose,
-        smallWheelCenter,
-        smallWheelFront,
-        smallWheelRear,
-        bigWheel
+       uprightPole,
+       hoop
     }
 }
 

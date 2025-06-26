@@ -45,7 +45,8 @@ function createMeshes() {
 
 
     const ball = new THREE.Mesh(geometries.ball, materials.grip)
-    ball.position.y = 0.1143 + .22
+    ball.position.y = 0.1143 + .22;
+    ball.castShadow = true;
 
     return {
        court,
