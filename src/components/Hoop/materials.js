@@ -1,33 +1,24 @@
-import { 
-    MeshStandardMaterial, 
-    MeshPhongMaterial, 
-    TextureLoader, 
-    LineBasicMaterial, 
-    DoubleSide
-} from "three";
-import { or } from "three/tsl";
-
 function createMaterials() {
-    const base = new MeshPhongMaterial({
+    const base = new THREE.MeshStandardMaterial({
         color: 0x4F5050,
-        shininess: 60,
-    })
+        metalness: true,
+        roughness: 0.6
+    });
 
-    const glass = new MeshStandardMaterial({
+    const glass = new THREE.MeshStandardMaterial({
         color: 0xffffff,
         transparent: true,
         opacity: 0.3
-    })
+    });
 
-    const orangeMetal = new MeshStandardMaterial({
+    const orangeMetal = new THREE.MeshStandardMaterial({
         color: 0xEC6F02,
         metalness: true,
         roughness: 0.6,
-        side: DoubleSide
-        
-    })
+        side: THREE.DoubleSide
+    });
 
-    const net = new MeshStandardMaterial({
+    const net = new THREE.MeshStandardMaterial({
         color: 0xffffff,
         wireframe: true
     });
@@ -37,7 +28,7 @@ function createMaterials() {
         glass,
         orangeMetal,
         net
-     };
+    };
 }
 
 export { createMaterials };

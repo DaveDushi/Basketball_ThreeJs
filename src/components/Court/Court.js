@@ -15,7 +15,10 @@ class Court extends THREE.Group {
             this.meshes.circle,
             this.meshes.threePointCurve,
             threePointCurveCopy,
-            this.meshes.ball
+            this.meshes.ball,
+            this.meshes.leftHoop,
+            this.meshes.rightHoop,
+            this.meshes.sideLines
         )
 
     }

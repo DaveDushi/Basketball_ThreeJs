@@ -1,16 +1,14 @@
-import { Group } from "three";
-import { createMeshes } from "./meshes";
+import { createMeshes } from "./meshes.js";
 
-class Hoop extends Group {
+class Hoop extends THREE.Group {
     constructor() {
         super();
 
         this.meshes = createMeshes();
 
         this.add(
-        //   this.meshes.backboard,
           this.meshes.hoop,
-        //   this.meshes.uprightPole
+          this.meshes.base,
         )
 
     }

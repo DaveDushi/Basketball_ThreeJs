@@ -10,13 +10,16 @@ function createGeometries() {
 
     const ball = new THREE.SphereGeometry(0.2286, 64, 64);
 
+    const sideLines = new THREE.BoxGeometry(1, 0.2, 1);
+
 
     return {
         court,
         line,
         circle,
         threePointArc,
-        ball
+        ball,
+        sideLines
     }
 }
 

@@ -20,10 +20,16 @@ function createMaterials() {
 
     })
 
+    const sideLines = new THREE.MeshPhongMaterial({
+        color: 0xB2E4FE,
+        shininess: 50
+    })
+
     return { 
         floor, 
         paint,
-        grip
+        grip,
+        sideLines
      };
 }
 

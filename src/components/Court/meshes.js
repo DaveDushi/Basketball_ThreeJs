@@ -1,3 +1,4 @@
+import { Hoop } from '../Hoop/Hoop.js';
 import { createGeometries } from './geometries.js';
 import { createMaterials } from './materials.js';
 
@@ -48,12 +49,46 @@ function createMeshes() {
     ball.position.y = 0.1143 + .22;
     ball.castShadow = true;
 
+    const leftHoop = new Hoop();
+    leftHoop.rotation.y = Math.PI / 2
+    leftHoop.position.x = -13.2
+    leftHoop.castShadow = true;
+
+    const rightHoop = new Hoop();
+    rightHoop.rotation.y = -(Math.PI / 2)
+    rightHoop.position.x = 13.2
+    rightHoop.castShadow = true;
+
+    const sideLines = new THREE.Group();
+    const sideLineSquare = new THREE.Mesh(geometries.sideLines, materials.sideLines);
+
+    const leftSideLine = sideLineSquare.clone()
+    leftSideLine.scale.z = 15.24
+    leftSideLine.scale.x = 2
+    leftSideLine.position.x = -15.325
+
+    const rightSideLine = leftSideLine.clone();
+    rightSideLine.position.x = 15.325
+
+    const topSideLine = sideLineSquare.clone()
+    topSideLine.scale.z = 2
+    topSideLine.scale.x = 28.65 + 4 
+    topSideLine.position.z = -8.62;
+
+    const bottomSideLine = topSideLine.clone()
+    bottomSideLine.position.z = 8.62
+
+    sideLines.add(leftSideLine, rightSideLine, topSideLine, bottomSideLine)
+
     return {
        court,
        centerLine,
        circle,
        threePointCurve,
-       ball
+       ball,
+       leftHoop,
+       rightHoop,
+       sideLines
     }
 }
 
