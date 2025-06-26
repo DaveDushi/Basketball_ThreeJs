@@ -8,12 +8,15 @@ function createGeometries() {
 
     const threePointArc = new THREE.RingGeometry(7.32, 7.4, 64, 64, 0, 2.3)
 
+    const ball = new THREE.SphereGeometry(0.2286, 64, 64);
+
 
     return {
         court,
         line,
         circle,
-        threePointArc
+        threePointArc,
+        ball
     }
 }
 

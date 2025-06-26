@@ -43,11 +43,16 @@ function createMeshes() {
     circle.position.y = 0.15
     circle.rotation.x = (Math.PI / 2)
 
+
+    const ball = new THREE.Mesh(geometries.ball, materials.grip)
+    ball.position.y = 0.1143 + .22
+
     return {
        court,
        centerLine,
        circle,
-       threePointCurve
+       threePointCurve,
+       ball
     }
 }
 
