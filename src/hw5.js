@@ -29,22 +29,18 @@ function degrees_to_radians(degrees) {
 
 // Create basketball court
 function createBasketballCourt() {
-  // Court floor - just a simple brown surface
-  // const courtGeometry = new THREE.BoxGeometry(30, 0.2, 15);
-  // const courtMaterial = new THREE.MeshPhongMaterial({ 
-  //   color: 0xc68642,  // Brown wood color
-  //   shininess: 50
-  // });
   const court = new Court()
   court.receiveShadow = true;
   scene.add(court);
+
+  return court;
   
   // Note: All court lines, hoops, and other elements have been removed
   // Students will need to implement these features
 }
 
 // Create all elements
-createBasketballCourt();
+const court = createBasketballCourt();
 
 // Set camera position for better view
 const cameraTranslate = new THREE.Matrix4();
@@ -54,6 +50,7 @@ camera.applyMatrix4(cameraTranslate);
 // Orbit controls
 const controls = new OrbitControls(camera, renderer.domElement);
 let isOrbitEnabled = true;
+const keysPressed = new Set();
 
 // Instructions display
 const instructionsElement = document.createElement('div');
@@ -75,18 +72,47 @@ function handleKeyDown(e) {
   if (e.key === "o") {
     isOrbitEnabled = !isOrbitEnabled;
   }
+
+  if (
+    e.key === "ArrowLeft" ||
+    e.key === "ArrowRight" ||
+    e.key === "ArrowUp" ||
+    e.key === "ArrowDown"
+  ) {
+    keysPressed.add(e.key);
+  }
+
+  if (e.key === " ") {
+    court.shoot(15, 60); // example
+  }
+}
+
+function handleKeyUp(e) {
+  if (
+    e.key === "ArrowLeft" ||
+    e.key === "ArrowRight" ||
+    e.key === "ArrowUp" ||
+    e.key === "ArrowDown"
+  ) {
+    keysPressed.delete(e.key);
+  }
 }
 
 document.addEventListener('keydown', handleKeyDown);
+document.addEventListener('keyup', handleKeyUp);
+
+const clock = new THREE.Clock();
 
 // Animation function
 function animate() {
   requestAnimationFrame(animate);
-  
+  const delta = clock.getDelta();
   // Update controls
   controls.enabled = isOrbitEnabled;
   controls.update();
-  
+
+  court.tick(delta, keysPressed);
+
   renderer.render(scene, camera);
 }
 
