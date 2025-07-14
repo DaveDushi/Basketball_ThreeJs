@@ -8,6 +8,7 @@ function createMeshes() {
 
     const court = new THREE.Mesh(geometries.court, materials.floor);
     court.receiveShadow = true;
+    court.name = 'court';
    
     const line = new THREE.Mesh( geometries.line, materials.paint);
 
@@ -45,19 +46,22 @@ function createMeshes() {
     circle.rotation.x = (Math.PI / 2)
 
 
-    const ball = new THREE.Mesh(geometries.ball, materials.grip)
+    const ball = new THREE.Mesh(geometries.ball, materials.grip);
     ball.position.y = 0.1143 + .22;
     ball.castShadow = true;
+    ball.name = 'basketball';
 
     const leftHoop = new Hoop();
-    leftHoop.rotation.y = Math.PI / 2
-    leftHoop.position.x = -13.2
+    leftHoop.rotation.y = Math.PI / 2;
+    leftHoop.position.x = -13.2;
     leftHoop.castShadow = true;
+    leftHoop.name = 'leftHoop';
 
     const rightHoop = new Hoop();
-    rightHoop.rotation.y = -(Math.PI / 2)
-    rightHoop.position.x = 13.2
+    rightHoop.rotation.y = -(Math.PI / 2);
+    rightHoop.position.x = 13.2;
     rightHoop.castShadow = true;
+    rightHoop.name = 'rightHoop';
 
     const sideLines = new THREE.Group();
     const sideLineSquare = new THREE.Mesh(geometries.sideLines, materials.sideLines);
