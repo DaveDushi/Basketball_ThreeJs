@@ -1,8 +1,7 @@
 # WebGL Basketball Game
 
 ## Demo
-https://github.com/DaveDushi/Basketball_ThreeJs/assets/demo.mp4
-
+[Demo Video](https://drive.google.com/file/d/1b5vbHN0ryFjBiVNPZlRP6EwP2yws6lRS/view?usp=sharing)
 ## Group Members
 - Ariel Jankelowitz
 - David Dusi
