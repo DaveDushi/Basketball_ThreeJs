@@ -75,12 +75,12 @@ class UIController {
 
         // Power adjustment
         if (event.key === 'w') {
-            this.shotPower = Math.min(this.shotPower + .5, 15);
-            this.showStatus(`Shot Power: ${(this.shotPower / 15 * 100)}%`);
+            this.shotPower = Math.min(this.shotPower + .1, 15);
+            this.showStatus(`Shot Power: ${Math.round(this.shotPower / 15 * 100)}%`);
             this.updateUI();
         } else if (event.key === 's') {
-            this.shotPower = Math.max(this.shotPower - .5, 5);
-            this.showStatus(`Shot Power: ${(this.shotPower / 15 * 100)}%`);
+            this.shotPower = Math.max(this.shotPower - .1, 5);
+            this.showStatus(`Shot Power: ${Math.round(this.shotPower / 15 * 100)}%`);
             this.updateUI();
         }
 
