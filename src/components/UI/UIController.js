@@ -41,7 +41,7 @@ class UIController {
 
     updateUI() {
         // Update power indicator
-        const powerPercentage = (this.shotPower - 5) / (30 - 5) * 100;
+        const powerPercentage = (this.shotPower - 5) / (15 - 5) * 100;
         this.powerFill.style.width = `${powerPercentage}%`;
 
         // Update stats
@@ -75,12 +75,12 @@ class UIController {
 
         // Power adjustment
         if (event.key === 'w') {
-            this.shotPower = Math.min(this.shotPower + 1, 30);
-            this.showStatus(`Shot Power: ${this.shotPower}`);
+            this.shotPower = Math.min(this.shotPower + .5, 15);
+            this.showStatus(`Shot Power: ${(this.shotPower / 15 * 100)}%`);
             this.updateUI();
         } else if (event.key === 's') {
-            this.shotPower = Math.max(this.shotPower - 1, 5);
-            this.showStatus(`Shot Power: ${this.shotPower}`);
+            this.shotPower = Math.max(this.shotPower - .5, 5);
+            this.showStatus(`Shot Power: ${(this.shotPower / 15 * 100)}%`);
             this.updateUI();
         }
 

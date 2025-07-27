@@ -54,13 +54,25 @@ class Court extends THREE.Group {
             slantedPole: new THREE.BoxHelper(this.meshes.rightHoop.getObjectByName("slantedPole"), 0xccccff)
         };
 
+        this.leftRimBoxHelper =  {
+            rim: new THREE.BoxHelper(this.meshes.leftHoop.getObjectByName("rimCircle"), 0xffff00),
+            connector: new THREE.BoxHelper(this.meshes.leftHoop.getObjectByName("rimConnector"), 0xffff00)
+        }
+        
+        this.rightRimBoxHelper =  {
+            rim: new THREE.BoxHelper(this.meshes.rightHoop.getObjectByName("rimCircle"), 0xffff00),
+            connector: new THREE.BoxHelper(this.meshes.rightHoop.getObjectByName("rimConnector"), 0xffff00)
+        }
+
         // Add box helpers to the scene
         this.add(
             this.ballBoxHelper,
             this.leftBackboardBoxHelper,
             this.rightBackboardBoxHelper,
             ...Object.values(this.leftBaseHelpers),
-            ...Object.values(this.rightBaseHelpers)
+            ...Object.values(this.rightBaseHelpers),
+            ...Object.values(this.leftRimBoxHelper),
+            ...Object.values(this.rightRimBoxHelper)
         );
     }
 
@@ -118,11 +130,42 @@ class Court extends THREE.Group {
         this.shooting = true;
 
         const angle = THREE.MathUtils.degToRad(angleDegrees);
-        // Initial velocity
-        const speed = power; // e.g., 15
-        this.velocity.z = 0;  // shooting straight forward for now
-        this.velocity.x = -Math.cos(angle) * speed; // Negative is towards left side, Positive is towarda rights side
-        this.velocity.y = Math.sin(angle) * speed;  // upward
+
+        // Determine closest hoop and get its position
+        const distToLeft = this.meshes.ball.position.distanceTo(this.meshes.leftHoop.position);
+        const distToRight = this.meshes.ball.position.distanceTo(this.meshes.rightHoop.position);
+        const targetHoop = distToLeft < distToRight ? this.meshes.leftHoop : this.meshes.rightHoop;
+        
+        // Get the rim position for more accurate targeting
+        const rimAssembly = targetHoop.getObjectByName("rimAssembly");
+        const targetPos = new THREE.Vector3();
+        rimAssembly.getWorldPosition(targetPos);
+        
+        // Calculate direction to the hoop
+        const ballPos = this.meshes.ball.position.clone();
+        const directionToHoop = new THREE.Vector3()
+            .subVectors(targetPos, ballPos)
+            .normalize();
+
+        // Calculate the horizontal distance to determine shot arc
+        const horizontalDist = new THREE.Vector2(
+            targetPos.x - ballPos.x,
+            targetPos.z - ballPos.z
+        ).length();
+
+        // Adjust vertical angle based on distance
+        const verticalAngle = angle + (horizontalDist * 0.02); // Increase arc for longer shots
+        
+        // Calculate velocity components
+        const speed = power;
+        const horizontalSpeed = Math.cos(verticalAngle) * speed;
+        
+        // Set velocity components
+        this.velocity.set(
+            directionToHoop.x * horizontalSpeed,
+            Math.sin(verticalAngle) * speed,
+            directionToHoop.z * horizontalSpeed
+        );
 
         // --- Spin calculation ---
         const spinAngle = Math.PI / 4; // 45 degrees in radians
@@ -137,6 +180,11 @@ class Court extends THREE.Group {
         this.ballBoxHelper.update();
         this.leftBackboardBoxHelper.update();
         this.rightBackboardBoxHelper.update();
+
+
+        Object.values(this.leftRimBoxHelper).forEach(helper => helper.update());
+        Object.values(this.rightRimBoxHelper).forEach(helper => helper.update());
+
         
         // Update left base helpers
         Object.values(this.leftBaseHelpers).forEach(helper => helper.update());
@@ -148,28 +196,6 @@ class Court extends THREE.Group {
 
         // Build ball bounding box
         const ballBox = this.getBoundingBox(this.meshes.ball);
-
-        // Check against backboards
-        const leftBackboard = this.meshes.leftHoop.getObjectByName("backboard");
-        const rightBackboard = this.meshes.rightHoop.getObjectByName("backboard");
-
-        if (leftBackboard && ballBox.intersectsBox(this.getBoundingBox(leftBackboard))) {
-            this.bounceOffSurface("backboard", "left");
-        }
-        if (rightBackboard && ballBox.intersectsBox(this.getBoundingBox(rightBackboard))) {
-            this.bounceOffSurface("backboard", "right");
-        }
-
-        // Check against hoop bases (pole or support)
-        const leftBase = this.meshes.leftHoop.getObjectByName("hoopBase");
-        const rightBase = this.meshes.rightHoop.getObjectByName("hoopBase");
-
-        if (leftBase && ballBox.intersectsBox(this.getBoundingBox(leftBase))) {
-            this.bounceOffSurface("base", "left");
-        }
-        if (rightBase && ballBox.intersectsBox(this.getBoundingBox(rightBase))) {
-            this.bounceOffSurface("base", "right");
-        }
 
         // Ground bounce
         const groundY = 0.3343;
@@ -186,70 +212,6 @@ class Court extends THREE.Group {
             }
         }
     }
-
-    bounceOffSurface(type, side) {
-        if (type === "backboard") {
-            const backboard = side === "left"
-                ? this.meshes.leftHoop.getObjectByName("backboard")
-                : this.meshes.rightHoop.getObjectByName("backboard");
-
-            const boardPos = new THREE.Vector3();
-            backboard.getWorldPosition(boardPos);
-
-            const ballPos = this.meshes.ball.position;
-
-            // Assume backboard normal is facing positive Z (modify if needed)
-            const normal = new THREE.Vector3(0, 0, 1);
-            if (side === "left") normal.z = -1; // flip direction if left hoop
-
-            // Push ball out of backboard to prevent sinking
-            const separation = 0.1;
-            ballPos.addScaledVector(normal, separation);
-
-            // Reflect velocity around backboard normal
-            const horizontalVelocity = new THREE.Vector3(this.velocity.x, 0, this.velocity.z);
-            const reflected = horizontalVelocity.reflect(normal);
-
-            this.velocity.x = reflected.x * 0.7;
-            this.velocity.z = reflected.z * 0.7;
-
-            // Slightly damp vertical velocity
-            this.velocity.y *= 0.9;
-        }
-
-
-        if (type === "base") {
-            // Reflect away from pole center
-            const base = side === "left"
-                ? this.meshes.leftHoop.getObjectByName("hoopBase")
-                : this.meshes.rightHoop.getObjectByName("hoopBase");
-
-            const basePos = new THREE.Vector3();
-            base.getWorldPosition(basePos);
-
-            const ballPos = this.meshes.ball.position;
-
-            // Vector from base to ball (direction of escape)
-            const normal = new THREE.Vector3().subVectors(ballPos, basePos).normalize();
-
-            // Push ball slightly out so it doesn't sink
-            const separation = 0.1;
-            ballPos.addScaledVector(normal, separation);
-
-            // Reflect horizontal velocity off the pole
-            const horizontalVelocity = new THREE.Vector3(this.velocity.x, 0, this.velocity.z);
-            const reflected = horizontalVelocity.reflect(normal);
-
-            // Damp and update
-            this.velocity.x = reflected.x * 0.6;
-            this.velocity.z = reflected.z * 0.6;
-
-            // Optional: damp vertical to prevent jumpy bounce
-            this.velocity.y *= 0.7;
-        }
-
-    }
-
 
     getBoundingBox(object) {
         const box = new THREE.Box3();
