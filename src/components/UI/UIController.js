@@ -4,7 +4,7 @@ class UIController {
     constructor(court, camera, renderer) {
         this.court = court;
         this.keysPressed = new Set();
-        this.shotPower = 15; // default shot power
+        this.shotPower = 10; // default shot power
         this.shotAngle = 45; // default shot angle in degrees
 
         // Game stats
@@ -22,6 +22,7 @@ class UIController {
         this.attemptsElement = document.getElementById('attempts');
         this.accuracyElement = document.getElementById('accuracy');
         this.statusElement = document.getElementById('status');
+        this.angleElement = document.getElementById('angle-display');
 
         // Bind methods
         this.onKeyDown = this.onKeyDown.bind(this);
@@ -37,6 +38,35 @@ class UIController {
     initializeEventListeners() {
         window.addEventListener('keydown', this.onKeyDown);
         window.addEventListener('keyup', this.onKeyUp);
+        
+        // Listen for scoring events
+        window.addEventListener('basketScored', (e) => {
+            this.score += e.detail.points;
+            this.accuracy = ((this.score / 2) / this.attempts) * 100;
+            this.updateUI();
+            // Show success message
+            if (e.detail.made) {
+                this.showStatus('SCORE!', '#00ff00');
+            } else {
+                this.showStatus('MISS!', '#ff0000');
+            }
+            
+        });
+
+        // Listen for shot attempts
+        window.addEventListener('shotAttempted', (e) => {
+            this.attempts++;
+            this.updateUI();
+        });
+
+        // Listen for resetShotPower event
+        window.addEventListener('resetShotPower', (e) => {
+            this.shotPower = e.detail.defaultPower;
+            this.score = 0; // Reset score
+            this.attempts = 0; // Reset attempts
+            this.accuracy = 0; // Reset accuracy
+            this.updateUI();
+        });
     }
 
     updateUI() {
@@ -47,16 +77,28 @@ class UIController {
         // Update stats
         this.scoreElement.textContent = this.score;
         this.attemptsElement.textContent = this.attempts;
-        this.accuracyElement.textContent = this.attempts > 0 
-            ? `${Math.round((this.score / this.attempts) * 100)}%` 
-            : '0%';
+        this.accuracyElement.textContent = 
+            this.attempts > 0 
+                ? `${Math.round((this.score / 2 / this.attempts) * 100)}%` 
+                : '0%';
+
+        // Update angle display
+        if (this.angleElement) {
+            this.angleElement.textContent = `${this.shotAngle}°`;
+        }
     }
 
-    showStatus(message, duration = 2000) {
-        this.statusElement.textContent = message;
-        setTimeout(() => {
-            this.statusElement.textContent = '';
-        }, duration);
+    showStatus(message, color) {
+        if (this.statusElement) {
+            this.statusElement.textContent = message;
+            this.statusElement.style.color = color;
+            this.statusElement.style.opacity = '1';
+            
+            // Fade out after 2 seconds
+            setTimeout(() => {
+                this.statusElement.style.opacity = '0';
+            }, 2000);
+        }
     }
 
     onKeyDown(event) {
@@ -68,29 +110,26 @@ class UIController {
         // Shooting controls
         if (event.key === ' ') { // Spacebar for shooting
             this.court.shoot(this.shotPower, this.shotAngle);
-            this.attempts++;
-            this.showStatus(`Shot! Power: ${this.shotPower}, Angle: ${this.shotAngle}°`);
+            this.showStatus(`Shot! Power: ${Math.round((this.shotPower - 5) / 10 * 100)}%, Angle: ${this.shotAngle}°`, '#ffffff');
             this.updateUI();
         }
 
         // Power adjustment
         if (event.key === 'w') {
             this.shotPower = Math.min(this.shotPower + .1, 15);
-            this.showStatus(`Shot Power: ${Math.round(this.shotPower / 15 * 100)}%`);
             this.updateUI();
         } else if (event.key === 's') {
             this.shotPower = Math.max(this.shotPower - .1, 5);
-            this.showStatus(`Shot Power: ${Math.round(this.shotPower / 15 * 100)}%`);
             this.updateUI();
         }
 
         // Angle adjustment
         if (event.key === 'd') {
             this.shotAngle = Math.min(this.shotAngle + 5, 85);
-            this.showStatus(`Shot Angle: ${this.shotAngle}°`);
+            this.updateUI();
         } else if (event.key === 'a') {
             this.shotAngle = Math.max(this.shotAngle - 5, 15);
-            this.showStatus(`Shot Angle: ${this.shotAngle}°`);
+            this.updateUI();
         }
 
         // Orbit controls toggle
@@ -101,23 +140,15 @@ class UIController {
 
         // Reset ball position
         if (event.key === 'r') {
-            // You'll need to implement resetBall in your Court class
             if (this.court.resetBall) {
                 this.court.resetBall();
-                this.showStatus('Ball Reset');
+                this.showStatus('Ball Reset', '#ffffff');
             }
         }
     }
 
     onKeyUp(event) {
         this.keysPressed.delete(event.key);
-    }
-
-    // Call this when a basket is scored
-    incrementScore() {
-        this.score++;
-        this.showStatus('🏀 Basket Scored!', 3000);
-        this.updateUI();
     }
 
     update(delta) {
